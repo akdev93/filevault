@@ -305,36 +305,3 @@ for line in sys.stdin:
         prompt()
 
 
-
-
-
-
-
-#vr = VaultRegistry("C:/Users/internet/Desktop/abhilash/tmp", False)
-#vault = Vault(vr)
-
-#vault.stash("test/letter4.txt")
-
-#paths = Path("test").glob('**/*')
-
-#for path in paths:
-#    p=Path(path)
-#    if p.is_dir() == True:
-#        print(f'is dir. Skipping {path}')
-#    else:
-#        vault.stash(p.as_posix())
-
-#fileInfos = vr.listFiles()
-#
-#for f in fileInfos:
-#    print(f"{f.id}, {f.fileName}, {f.filePath}, {f.vaultPath}, {f.encryptionKey}")
-
-
-#vault.retrieve(25)
-
-
-
-
-
-
-
