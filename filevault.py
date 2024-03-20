@@ -48,7 +48,6 @@ class VaultRegistry:
         result = self.cursor.execute(f"select id, name, source_file_path, vault_file_path, encryption_key, insert_ts from vault_registry where name like '%{name}%'")
         files = []
         for row in result:
-            print(row[5])
             files.append(FileInfo(row[0], row[1], row[2], row[3], row[4], row[5]))
         return files
 
@@ -139,11 +138,11 @@ class VaultCommands:
         keyFile = args[1]
         if(not Path(vaultPath).exists()):
             print(f"[ERROR] path {vaultPath} doesn't exist")
-            return False
+            return
 
         if(Path(keyFile).exists()):
             print(f"Key {keyFile} already exists")
-            return False
+            return
 
         vaultRegistry = VaultRegistry(vaultPath, True)
         vaultRegistry.close()
@@ -154,14 +153,14 @@ class VaultCommands:
             encryptor.encryptFile2(f"{vaultRegistry.directoryPath}/file-vault.db", f"{vaultRegistry.directoryPath}", "file-vault.db.7z")
         except EncryptionException:
             print("[ERROR] encryption of the database failed. Could not create vault")
-            return True
+            return
         file = open(keyFile,"w")
         file.write(key)
         file.close()
         Path(f"{vaultRegistry.directoryPath}/file-vault.db").unlink()
         print(f"vault created at {vaultPath}. Please open the vault with the key file {keyFile}")
         print(f"!!!WARNING!!! -> Pleae store the key {keyFile} in a secure place")
-        return True
+        return
 
 
     def open(self, args):
