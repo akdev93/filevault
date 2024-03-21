@@ -10,6 +10,7 @@ import shlex
 import traceback
 import datetime
 
+# 
 
 class VaultRegistry:
 
@@ -29,6 +30,29 @@ class VaultRegistry:
         self.load()
         self.cursor.execute("CREATE TABLE vault_registry(id integer primary key, name TEXT, source_file_path TEXT, vault_file_path TEXT, encryption_key TEXT, insert_ts timestamp)")
         print("Created table vault_registry")
+        self.cursor.execute("CREATE TABLE vault_config(config TEXT primary key, value TEXT)")
+        print("created table vault_config")
+
+
+    def readConfig(self):
+        result = self.cursor.execute(f"select config, value from vault_config")
+        configMap = {}
+        for row in result:
+            #            print(f"{row[0]} = {row[1]}")
+            configMap[row[0]] = row[1]
+        encryptionCommandPath = configMap.get("encryption_cmd_path", "7z.exe")
+        minKeySize = int(configMap.get("min_keysize", "50"))
+        maxKeySize = int(configMap.get("max_keysize", "100"))
+        maxFilesPerDirectory = int(configMap.get("max_files_per_dir", 200))
+
+        return VaultConfig(minKeySize, maxKeySize, maxFilesPerDirectory, encryptionCommandPath)
+        
+
+    def updateConfig(self, config, value):
+        self.cursor.execute(f"delete from vault_config where config='{config}'")
+        self.cursor.execute(f"insert into vault_config(config, value) values ('{config}', '{value}')")
+        self.connection.commit()
+        return self.readConfig()
 
 
     def load(self):
@@ -74,10 +98,11 @@ class VaultRegistry:
 
 class VaultConfig:
 
-    def __init__(self, minKeySize = 100, maxKeySize = 128, maxFilesPerDirectory = 10):
+    def __init__(self, minKeySize = 100, maxKeySize = 128, maxFilesPerDirectory = 10, encryptionCommandPath = "7z.exe"):
         self.minKeySize = minKeySize
         self.maxKeySize = maxKeySize
         self.maxFilesPerDirectory = maxFilesPerDirectory
+        self.encryptionCommandPath = encryptionCommandPath
         
 
 
@@ -97,16 +122,17 @@ class Vault:
 
     def __init__(self, vaultRegistry):
         self.vaultRegistry = vaultRegistry
+        self.vaultConfig = self.vaultRegistry.readConfig()
 
 
     def stash(self, file):
         key = KeyGenerators.randomKey(128)
-        encryptor = Encryptor(lambda: key)
+        encryptor = Encryptor(lambda: key, cmdPrefix = self.vaultConfig.encryptionCommandPath)
         filePath = Path(file)
         if(not filePath.exists()):
             raise Exception(f"{file} doesn't exist")
 
-        subDir = "{:05d}".format(int(self.vaultRegistry.size() / VaultConfig().maxFilesPerDirectory))
+        subDir = "{:05d}".format(int(self.vaultRegistry.size() / self.vaultConfig.maxFilesPerDirectory))
         vaultDirPath = Path(f"{self.vaultRegistry.directoryPath}/{subDir}/")
         vaultDirPath.mkdir(exist_ok=True)
 
@@ -122,6 +148,9 @@ class Vault:
         fileInfo = self.vaultRegistry.getFileInfoById(id)
         encryptor = Encryptor(lambda:fileInfo.encryptionKey)
         encryptor.decryptFile(fileInfo.vaultPath, fileInfo.filePath)
+
+    def updateConfig(self, key, value):
+        self.vaultConfig = self.vaultRegistry.updateConfig(key, value)
 
 
 
@@ -209,7 +238,7 @@ class VaultCommands:
             return 
 
         self.vault.vaultRegistry.close()
-        encryptor = Encryptor(lambda: KeyGenerators.fromFile(self.keyFile))
+        encryptor = Encryptor(lambda: KeyGenerators.fromFile(self.keyFile), cmdPrefix = self.vault.vaultConfig.encryptionCommandPath)
         try:
             encryptor.encryptFile2(f"{self.vault.vaultRegistry.directoryPath}/file-vault.db", f"{self.vault.vaultRegistry.directoryPath}", "file-vault.db.7z")
         except EncryptionException:
@@ -254,6 +283,16 @@ class VaultCommands:
         else:
             raise ValueError("Invalid Number of arguments for the help command")
 
+    def config(self, args):
+        if(len(args) != 2):
+            raise ValueError("Invalid number of arguments for config")
+
+        if(self.vault is None):
+            print("No vault is open")
+            return
+
+        self.vault.updateConfig(args[0], args[1])
+
 
 
 vc = VaultCommands()
@@ -265,7 +304,8 @@ commands = {
         "retrieve": lambda args: vc.retrieve(args),
         "create": lambda args: vc.create(args),
         "close": lambda args: vc.close(args),
-        "help": lambda args: vc.help(args)
+        "help": lambda args: vc.help(args),
+        "config": lambda args: vc.config(args)
         }
 
 command_usage = {
@@ -276,7 +316,8 @@ command_usage = {
         "retrieve": "retrieve <vault file id>",
         "create": "create <path to vault> <key file>",
         "close": "close",
-        "help": "help <command>"
+        "help": "help <command>",
+        "config": "config <config> <value>"
         }
 
 

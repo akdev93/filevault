@@ -13,8 +13,9 @@ class EncryptionException(Exception):
 class Encryptor:
 
     
-    def __init__(self, keyAccessor):
+    def __init__(self, keyAccessor, cmdPrefix = "7z.exe"):
         self.key = keyAccessor()
+        self.cmdPrefix = cmdPrefix
 
         
     def encryptFile(self, file, outputDirectory):
@@ -33,7 +34,7 @@ class Encryptor:
         
     def encryptFiles(self, files, outputFileName, outputDirectory):
 
-        command_args = ['7z.exe', 'a', f'-p{self.key}', "-aoa", f'{outputDirectory}/{outputFileName}']
+        command_args = [self.cmdPrefix, 'a', f'-p{self.key}', "-aoa", f'{outputDirectory}/{outputFileName}']
         for f in files:
             command_args.append(f)
 
@@ -44,7 +45,7 @@ class Encryptor:
         
         fileName = Path(file).name
 
-        command_args = ['7z.exe', 'e', f'-p{self.key}', f'-o{outputDirectory}', "-aoa", file]
+        command_args = [self.cmdPrefix, 'e', f'-p{self.key}', f'-o{outputDirectory}', "-aoa", file]
         self._executeHostCommand(command_args)
 
 
