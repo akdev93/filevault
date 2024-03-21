@@ -38,14 +38,13 @@ class VaultRegistry:
         result = self.cursor.execute(f"select config, value from vault_config")
         configMap = {}
         for row in result:
-            #            print(f"{row[0]} = {row[1]}")
             configMap[row[0]] = row[1]
-        encryptionCommandPath = configMap.get("encryption_cmd_path", "7z.exe")
+        #encryptionCommandPath = configMap.get("encryption_cmd_path", "7z.exe")
         minKeySize = int(configMap.get("min_keysize", "50"))
         maxKeySize = int(configMap.get("max_keysize", "100"))
         maxFilesPerDirectory = int(configMap.get("max_files_per_dir", 200))
 
-        return VaultConfig(minKeySize, maxKeySize, maxFilesPerDirectory, encryptionCommandPath)
+        return VaultConfig(minKeySize, maxKeySize, maxFilesPerDirectory)
         
 
     def updateConfig(self, config, value):
@@ -98,11 +97,10 @@ class VaultRegistry:
 
 class VaultConfig:
 
-    def __init__(self, minKeySize = 100, maxKeySize = 128, maxFilesPerDirectory = 10, encryptionCommandPath = "7z.exe"):
+    def __init__(self, minKeySize = 100, maxKeySize = 128, maxFilesPerDirectory = 10):
         self.minKeySize = minKeySize
         self.maxKeySize = maxKeySize
         self.maxFilesPerDirectory = maxFilesPerDirectory
-        self.encryptionCommandPath = encryptionCommandPath
         
 
 
@@ -127,7 +125,7 @@ class Vault:
 
     def stash(self, file):
         key = KeyGenerators.randomKey(128)
-        encryptor = Encryptor(lambda: key, cmdPrefix = self.vaultConfig.encryptionCommandPath)
+        encryptor = Encryptor(lambda: key)
         filePath = Path(file)
         if(not filePath.exists()):
             raise Exception(f"{file} doesn't exist")
@@ -238,7 +236,7 @@ class VaultCommands:
             return 
 
         self.vault.vaultRegistry.close()
-        encryptor = Encryptor(lambda: KeyGenerators.fromFile(self.keyFile), cmdPrefix = self.vault.vaultConfig.encryptionCommandPath)
+        encryptor = Encryptor(lambda: KeyGenerators.fromFile(self.keyFile))
         try:
             encryptor.encryptFile2(f"{self.vault.vaultRegistry.directoryPath}/file-vault.db", f"{self.vault.vaultRegistry.directoryPath}", "file-vault.db.7z")
         except EncryptionException:
@@ -337,7 +335,7 @@ for line in sys.stdin:
         s = shlex.split(line)
         cmdProcessed = False
         try:
-             commands.get(s[0])(s[1::])
+            commands.get(s[0],lambda args: print("invalid command"))(s[1::])
         except ValueError as ve:
             print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
         except Exception:
