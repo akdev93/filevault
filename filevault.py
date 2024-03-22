@@ -9,6 +9,7 @@ import sys
 import shlex
 import traceback
 import datetime
+import shutil
 
 # 
 
@@ -39,7 +40,6 @@ class VaultRegistry:
         configMap = {}
         for row in result:
             configMap[row[0]] = row[1]
-        #encryptionCommandPath = configMap.get("encryption_cmd_path", "7z.exe")
         minKeySize = int(configMap.get("min_keysize", "50"))
         maxKeySize = int(configMap.get("max_keysize", "100"))
         maxFilesPerDirectory = int(configMap.get("max_files_per_dir", 200))
@@ -124,7 +124,7 @@ class Vault:
 
 
     def stash(self, file):
-        key = KeyGenerators.randomKey(128)
+        key = KeyGenerators.randomKeyOfSizeRange(self.vaultConfig.minKeySize, self.vaultConfig.maxKeySize)
         encryptor = Encryptor(lambda: key)
         filePath = Path(file)
         if(not filePath.exists()):
@@ -161,10 +161,15 @@ class VaultCommands:
         if(len(args) != 2):
             raise ValueError("Invalid number of arguments for create command")
 
+
         vaultPath = args[0]
         keyFile = args[1]
         if(not Path(vaultPath).exists()):
             print(f"[ERROR] path {vaultPath} doesn't exist")
+            return
+
+        if((not Path(vaultPath).is_dir()) or (len([c for c in Path(vaultPath).iterdir()]) != 0)):
+            print(f"[ERROR] path {vaultPath} is not an empty directory")
             return
 
         if(Path(keyFile).exists()):
@@ -324,8 +329,12 @@ def prompt():
     sys.stdout.write("vault>")
     sys.stdout.flush()
 
+if(shutil.which("7z") is None):
+    print("7z not found in path. Please add it to path and try again")
+    sys.exit()
 
 prompt()
+    
 
 for line in sys.stdin:
     if "EXIT" == line.rstrip().upper():
