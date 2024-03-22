@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import subprocess
 import secrets
+import random
 
 
 class EncryptionException(Exception):
@@ -116,5 +117,8 @@ class KeyGenerators:
     def randomKey(size):
         return secrets.token_urlsafe(size)
 
+    def randomKeyOfSizeRange(minSize, maxSize):
+        size = random.randint(minSize, maxSize)
+        return secrets.token_urlsafe(size)
 
 
