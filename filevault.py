@@ -268,6 +268,24 @@ class VaultCommands:
             
         self.vault.stash(args[0])
 
+    def stashDirectory(self, args):
+
+        if(len(args) != 1):
+            raise ValueError("Invalid number of arguments for stash_directory command")
+
+        dirPath = Path(args[0])
+
+        if(not dirPath.is_dir()):
+            raise ValueError(f"Invalid directory path : {dirPath}")
+
+        for filePath in dirPath.iterdir():
+            if(filePath.is_file()):
+                self.stash([filePath.as_posix()])
+
+
+
+
+
     def retrieve(self, args):
         if(len(args) !=1):
             raise ValueError("Invalid number of arguments for retrieve command")
@@ -281,6 +299,11 @@ class VaultCommands:
             print(f"Unable to retrieve {args[0]}: {str(e)}")
 
     def help(self, args):
+        if(len(args) == 0):
+            print("Commands:")
+            for key in command_usage.keys():
+                print(f"{key}: {command_usage.get(key)}")
+            return
         if(len(args) == 1):
             print(f"Usage: {command_usage.get(args[0])}")
         else:
@@ -308,7 +331,9 @@ commands = {
         "create": lambda args: vc.create(args),
         "close": lambda args: vc.close(args),
         "help": lambda args: vc.help(args),
-        "config": lambda args: vc.config(args)
+        "config": lambda args: vc.config(args),
+        "stash_directory": lambda args: vc.stashDirectory(args)
+
         }
 
 command_usage = {
@@ -320,7 +345,8 @@ command_usage = {
         "create": "create <path to vault> <key file>",
         "close": "close",
         "help": "help <command>",
-        "config": "config <config> <value>"
+        "config": "config <config> <value>",
+        "stash_directory": "stash_directory <directory>"
         }
 
 
