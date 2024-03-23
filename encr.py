@@ -14,9 +14,10 @@ class EncryptionException(Exception):
 class Encryptor:
 
     
-    def __init__(self, keyAccessor, cmdPrefix = "7z.exe"):
+    def __init__(self, keyAccessor, cmdPrefix = "7z.exe", debug = False):
         self.key = keyAccessor()
         self.cmdPrefix = cmdPrefix
+        self.debug = debug
 
         
     def encryptFile(self, file, outputDirectory):
@@ -52,9 +53,13 @@ class Encryptor:
 
     def _executeHostCommand(self, command_args):
         completedProcess = subprocess.run(command_args, capture_output=True, shell = True)
-        print(completedProcess.stdout)
-        print(completedProcess.stderr)
-        print(completedProcess.returncode)
+        if(self.debug):
+            print(completedProcess.stdout)
+            print(completedProcess.stderr)
+            print(completedProcess.returncode)
+        else: # Empty the streams?
+            completedProcess.stdout
+            completedProcess.stderr
         if(completedProcess.returncode != 0):
             raise EncryptionException(completedProcess.stderr)
        
