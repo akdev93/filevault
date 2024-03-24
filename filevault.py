@@ -232,7 +232,7 @@ class VaultCommands:
             else:
                 searchString = args[0]
         for f in self.vault.vaultRegistry.searchFiles(searchString):
-            print(f"{f.id}, {f.fileName}, {f.filePath}, {f.vaultPath}, {f.insertTimestamp}")
+            print(f"{f.id:5d}| {f.fileName:>25s}| {f.filePath:>25s}| {f.vaultPath:>25s}| {f.insertTimestamp}")
 
 
     def close(self,args):
@@ -367,15 +367,16 @@ for line in sys.stdin:
         commands.get("close")([])
         break
     else:
-        s = shlex.split(line)
-        cmdProcessed = False
-        try:
-            commands.get(s[0],lambda args: print("invalid command"))(s[1::])
-        except ValueError as ve:
-            print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
-        except Exception:
-            print("[ERROR] : Command Failed with an exception. Please backup the database ASAP")
-            traceback.print_exc()
+        if not line.rstrip() == "":
+            s = shlex.split(line)
+            cmdProcessed = False
+            try:
+                commands.get(s[0],lambda args: print("invalid command"))(s[1::])
+            except ValueError as ve:
+                print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
+            except Exception:
+                print("[ERROR] : Command Failed with an exception. Please backup the database ASAP")
+                traceback.print_exc()
         prompt()
 
 
