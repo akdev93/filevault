@@ -231,8 +231,20 @@ class VaultCommands:
                 searchString = ""
             else:
                 searchString = args[0]
-        for f in self.vault.vaultRegistry.searchFiles(searchString):
-            print(f"{f.id:5d}| {f.fileName:>25s}| {f.filePath:>25s}| {f.vaultPath:>25s}| {f.insertTimestamp}")
+
+        results = self.vault.vaultRegistry.searchFiles(searchString)
+        # Pretty formatting... 
+        # Is there a better way without including external libraries?
+        # (looked at pretty table and tabulate)
+        maxVP = max(list(map(lambda x: len(x), list(map(lambda x: x.vaultPath, results)))))
+        maxFP = max(list(map(lambda x: len(x), list(map(lambda x: x.filePath, results)))))
+        maxFN = max(list(map(lambda x: len(x), list(map(lambda x: x.fileName, results)))))
+        headings = ["id", "file name", "path", "vault path", "time added"]
+        print(f"{headings[0]:5s}| {headings[1]:>{maxFN}s}| {headings[2]:>{maxFP}s}| {headings[3]:>{maxVP}s}|time added")
+        print(f"-------------------------------------------------------------------------------------------------------")
+
+        for f in results:
+            print(f"{f.id:5d}| {f.fileName:>{maxFN}s}| {f.filePath:>{maxFP}s}| {f.vaultPath:>{maxVP}s}| {f.insertTimestamp}")
 
 
     def close(self,args):
