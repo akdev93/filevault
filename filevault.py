@@ -10,6 +10,7 @@ import shlex
 import traceback
 import datetime
 import shutil
+import textwrap
 
 # 
 
@@ -241,10 +242,10 @@ class VaultCommands:
         maxFN = max(list(map(lambda x: len(x), list(map(lambda x: x.fileName, results)))))
         headings = ["id", "file name", "path", "vault path", "time added"]
         print(f"{headings[0]:5s}| {headings[1]:>{maxFN}s}| {headings[2]:>{maxFP}s}| {headings[3]:>{maxVP}s}|time added")
-        print(f"-------------------------------------------------------------------------------------------------------")
+        print(f"-----------------------------------------------------------------------------------------------------------------")
 
         for f in results:
-            print(f"{f.id:5d}| {f.fileName:>{maxFN}s}| {f.filePath:>{maxFP}s}| {f.vaultPath:>{maxVP}s}| {f.insertTimestamp}")
+            print(f"{f.id:5d}| {f.fileName:>{maxFN}s}| {f.filePath:>{maxFP}s}| {f.vaultPath:>{maxVP}s}| {str(f.insertTimestamp)[:-7]}")
 
 
     def close(self,args):
