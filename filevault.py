@@ -85,12 +85,14 @@ class VaultRegistry:
 
     def saveFileInfo(self, fileInfo):
         if(fileInfo.id == 0 ):
-            self.cursor.execute(f"Insert into vault_registry (id, name, source_file_path, vault_file_path, encryption_key, insert_ts) values (null, '{fileInfo.fileName}', '{fileInfo.filePath}','{fileInfo.vaultPath}','{fileInfo.encryptionKey}', '{fileInfo.insertTimestamp}')")
+            self.cursor.execute(f"Insert into vault_registry (id, name, source_file_path, vault_file_path, encryption_key, insert_ts) values (null, '{fileInfo.fileName}', '{fileInfo.filePath}','{fileInfo.vaultPath}','{fileInfo.encryptionKey}', '{fileInfo.insertTimestamp}') returning id")
+            fileInfo.id = self.cursor.fetchone()[0]
         else:
             print(f"update vault_registry set name = '{fileInfo.fileName}', source_file_path = '{fileInfo.filePath}', vault_file_path = '{fileInfo.vaultPath}', encryption_key = '{fileInfo.encryptionKey}' where id = {fileInfo.id}")
             self.cursor.execute(f"update vault_registry set name = '{fileInfo.fileName}', source_file_path = '{fileInfo.filePath}', vault_file_path = '{fileInfo.vaultPath}', encryption_key = '{fileInfo.encryptionKey}' where id = {fileInfo.id}")
 
         self.connection.commit()
+        return fileInfo
 
     def close(self):
         self.connection.close()
@@ -140,8 +142,10 @@ class Vault:
             vaultFilePath = Path(f"{vaultDirPath}/{random.randint(0,256)}.7z")
         
         encryptor.encryptFile2(file, vaultDirPath.as_posix(), vaultFilePath.name)
-        self.vaultRegistry.saveFileInfo(FileInfo(0, filePath.name, filePath.parent.as_posix(), vaultFilePath.as_posix(), key, datetime.datetime.now()))
+        fileInfo = self.vaultRegistry.saveFileInfo(FileInfo(0, filePath.name, filePath.parent.as_posix(), vaultFilePath.as_posix(), key, datetime.datetime.now()))
         Path(file).unlink()
+        return fileInfo
+
     
     def retrieve(self, id):
         fileInfo = self.vaultRegistry.getFileInfoById(id)
@@ -279,7 +283,13 @@ class VaultCommands:
             print(f"File {args[0]} not found")
             return 
             
-        self.vault.stash(args[0])
+        fi = self.vault.stash(args[0])
+        print("")
+        print(f"id         : {fi.id}")
+        print(f"file       : {fi.fileName}")
+        print(f"file path  : {fi.filePath}")
+        print(f"vault path : {fi.vaultPath}")
+        print(f"timestamp  : {fi.insertTimestamp}")
 
     def stashDirectory(self, args):
 
@@ -294,9 +304,6 @@ class VaultCommands:
         for filePath in dirPath.iterdir():
             if(filePath.is_file()):
                 self.stash([filePath.as_posix()])
-
-
-
 
 
     def retrieve(self, args):
@@ -315,7 +322,7 @@ class VaultCommands:
         if(len(args) == 0):
             print("Commands:")
             for key in command_usage.keys():
-                print(f"{key}: {command_usage.get(key)}")
+                print(f"{key:20s}: {command_usage.get(key)}")
             return
         if(len(args) == 1):
             print(f"Usage: {command_usage.get(args[0])}")
