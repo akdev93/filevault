@@ -284,12 +284,8 @@ class VaultCommands:
             return 
             
         fi = self.vault.stash(args[0])
-        print("")
-        print(f"id         : {fi.id}")
-        print(f"file       : {fi.fileName}")
-        print(f"file path  : {fi.filePath}")
-        print(f"vault path : {fi.vaultPath}")
-        print(f"timestamp  : {fi.insertTimestamp}")
+        self.printFileInfo(fi)
+
 
     def stashDirectory(self, args):
 
@@ -304,6 +300,24 @@ class VaultCommands:
         for filePath in dirPath.iterdir():
             if(filePath.is_file()):
                 self.stash([filePath.as_posix()])
+
+
+    def info(self, args):
+        if(len(args) != 1):
+            raise ValueError("Invalid number of arguments for info command")
+        fileInfo = self.vault.vaultRegistry.getFileInfoById(args[0])
+        if(not fileInfo is None):
+            self.printFileInfo(fileInfo)
+
+
+    def printFileInfo(self, fi):
+        print("")
+        print(f"id         : {fi.id}")
+        print(f"file       : {fi.fileName}")
+        print(f"file path  : {fi.filePath}")
+        print(f"vault path : {fi.vaultPath}")
+        print(f"timestamp  : {fi.insertTimestamp}")
+
 
 
     def retrieve(self, args):
@@ -352,8 +366,8 @@ commands = {
         "close": lambda args: vc.close(args),
         "help": lambda args: vc.help(args),
         "config": lambda args: vc.config(args),
-        "stash_directory": lambda args: vc.stashDirectory(args)
-
+        "stash_directory": lambda args: vc.stashDirectory(args),
+        "info": lambda args: vc.info(args)
         }
 
 command_usage = {
@@ -366,7 +380,8 @@ command_usage = {
         "close": "close",
         "help": "help <command>",
         "config": "config <config> <value>",
-        "stash_directory": "stash_directory <directory>"
+        "stash_directory": "stash_directory <directory>",
+        "info": "info <id>"
         }
 
 
