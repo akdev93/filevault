@@ -305,6 +305,11 @@ class VaultCommands:
     def info(self, args):
         if(len(args) != 1):
             raise ValueError("Invalid number of arguments for info command")
+
+        if(self.vault is None):
+            print("No vault is open")
+            return 
+
         fileInfo = self.vault.vaultRegistry.getFileInfoById(args[0])
         if(not fileInfo is None):
             self.printFileInfo(fileInfo)
