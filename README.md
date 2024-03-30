@@ -16,7 +16,7 @@ This is an encrypted vault to stash away files. Written python, it uses 7z to co
 
 ### Creating a Vault
 
-To create a vault use the command `create`. The example below creates a vault called `tmp7` and stores the encryption key in a file called `key7`. The vault is created int he vaults directory while the key file is stored in the current working directory
+To create a vault use the `create` command. The example below creates a vault called `tmp7` and stores the encryption key in a file called `key7`. The vault is created int he vaults directory while the key file is stored in the current working directory
 
 ```
 vault>create vaults/tmp8 key8
@@ -29,6 +29,73 @@ vault>
 ```
 *Please make sure you store the key generated in a secure location. Please do not store it in the vault itself or even on the same device as the vault*
 
-### Listing the contents of the vault
+### Openning a Vault
+
+
+Use the `open` command to open a vault. The commands needs the path to the vault and the key used to decrypt the vault's database. The example below opens a vault that is located in `vaults/tmp8` using the key in the file `key8`
+
+```
+vault>open vaults/tmp8 key8
+vault vaults/tmp8 opened
+vault>
+```
+
+
+### Stashing files into a Vault
+
+Use the `stash` command to encrypt and store a file into the vault. The file will be erased from the source location permanently. In the example below, the file in the path `test/test.txt` is stashed away in the vault that is currently open (`vaults/tmp8`). The output of the stash command gives you information on the storage of the file in the vault.
+
+```
+vault>open vaults/tmp8 key8
+vault vaults/tmp8 opened
+vault>stash test/test.txt
+
+id         : 1
+file       : test.txt
+file path  : test
+vault path : vaults/tmp8/00000/256.7z
+timestamp  : 2024-03-30 11:44:50.404053
+vault>
+```
+
+
+### Listing the contents of the Vault
+
+Use the `list` command to list the contents of the vault. The command takes an optional argument which is used to filter the listing to match the word. The example below lists the vault that is open
+
+```
+vault>list
+Number of files in the vault: 2
+id   |  file name| path|               vault path|time added
+-----------------------------------------------------------------------------------------------------------------
+    1|   test.txt| test| vaults/tmp8/00000/256.7z| 2024-03-30 11:44:50
+    2| letter.txt| test|  vaults/tmp8/00000/95.7z| 2024-03-30 11:48:44
+vault>
+```
+
+The examle below lists the contents that match the word test 
+
+```
+vault>list test
+Number of files in the vault: 2
+id   | file name| path|               vault path|time added
+-----------------------------------------------------------------------------------------------------------------
+    1| test.txt| test| vaults/tmp8/00000/256.7z| 2024-03-30 11:44:50
+vault>
+```
+
+### Retrieving a file from the Vault
+
+Use the `retrieve` command using the id of the file in the vault to recreate the file in the original location.  The file is (re)created in the location where it was stashed from. If a relative path was used in teh stash command, the file is recreated relative to the current working directory. In the example below, the vault `id=1` is retrieved which corresponds to `test.txt` . The file is recreated in the path `test/`
+
+```
+vault>list test
+Number of files in the vault: 2
+id   | file name| path|               vault path|time added
+-----------------------------------------------------------------------------------------------------------------
+    1| test.txt| test| vaults/tmp8/00000/256.7z| 2024-03-30 11:44:50
+vault>retrieve 1
+vault>
+```
 
 
