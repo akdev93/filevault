@@ -21,7 +21,7 @@ This is an encrypted vault to secure your files. Written python, it uses 7z to c
 
 ### Creating a Vault
 
-To create a vault use the `create` command. The example below creates a vault called `tmp7` and stores the encryption key in a file called `key7`. The vault is created int he vaults directory while the key file is stored in the current working directory
+To create a vault use the `create` command. The example below creates a vault called `tmp8` and stores the encryption key in a file called `key8`. The vault is created in the `vaults` directory while the key file is stored in the current working directory.
 
 ```
 vault>create vaults/tmp8 key8
