@@ -28,9 +28,9 @@ vault created at vaults/tmp8. Please open the vault with the key file key8
 vault>
 
 ```
-*Please make sure you store the key generated in a secure location. Please do not store it in the vault itself or even on the same device as the vault*
+*Please make sure you store the key generated in a secure location. Please do not store it in the vault itself or even on the same device as the vault.* The vault once created is not open. You will need to explicitly open the vault once it is created to start using it.
 
-### Openning a Vault
+### Opening a Vault
 
 
 Use the `open` command to open a vault. The commands needs the path to the vault and the key used to decrypt the vault's database. The example below opens a vault that is located in `vaults/tmp8` using the key in the file `key8`
