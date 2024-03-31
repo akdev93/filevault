@@ -41,7 +41,7 @@ vault>
 ```
 
 
-### Stashing files into a Vault
+### Stashing files into the Vault
 
 Use the `stash` command to encrypt and store a file into the vault. The file will be erased from the source location permanently. In the example below, the file in the path `test/test.txt` is stashed away in the vault that is currently open (`vaults/tmp8`). The output of the stash command gives you information on the storage of the file in the vault.
 
@@ -58,6 +58,19 @@ timestamp  : 2024-03-30 11:44:50.404053
 vault>
 ```
 
+### Stashing a directory into the Vault
+
+Use the `stash_directory` command to stash all files in the directory into the vault. This is not a recursive command. It will only stash the files found in the directory
+
+vault>stash_directory test/etc
+
+id         : 3
+file       : mtab
+file path  : test/etc
+vault path : vaults/tmp8/00000/153.7z
+timestamp  : 2024-03-30 21:50:42.351686
+vault>
+```
 
 ### Listing the contents of the Vault
 
@@ -95,6 +108,46 @@ id   | file name| path|               vault path|time added
 -----------------------------------------------------------------------------------------------------------------
     1| test.txt| test| vaults/tmp8/00000/256.7z| 2024-03-30 11:44:50
 vault>retrieve 1
+vault>
+```
+
+
+### Viewing information on a vault entry
+
+Use the `info` command to view the information on any file. See example below
+
+```
+vault>list
+Number of files in the vault: 3
+id   |  file name|     path|               vault path|time added
+-----------------------------------------------------------------------------------------------------------------
+    1|   test.txt|     test| vaults/tmp8/00000/256.7z| 2024-03-30 11:44:50
+    2| letter.txt|     test|  vaults/tmp8/00000/95.7z| 2024-03-30 11:48:44
+    3|       mtab| test/etc| vaults/tmp8/00000/153.7z| 2024-03-30 21:50:42
+vault>info 3
+
+id         : 3
+file       : mtab
+file path  : test/etc
+vault path : vaults/tmp8/00000/153.7z
+timestamp  : 2024-03-30 21:50:42.351686
+vault>
+```
+
+### Closing  the Vault
+
+Use `close` to close the vault. This will reencrypt the database which was open until now for operations.
+
+```
+vault vaults/tmp8 opened
+vault>list
+Number of files in the vault: 2
+id   |  file name| path|               vault path|time added
+-----------------------------------------------------------------------------------------------------------------
+    1|   test.txt| test| vaults/tmp8/00000/256.7z| 2024-03-30 11:44:50
+    2| letter.txt| test|  vaults/tmp8/00000/95.7z| 2024-03-30 11:48:44
+vault>close
+vault vaults/tmp8 closed
 vault>
 ```
 
