@@ -195,7 +195,7 @@ class VaultCommands:
         file.write(key)
         file.close()
         Path(f"{vaultRegistry.directoryPath}/file-vault.db").unlink()
-        print(f"vault created at {vaultPath}. Please open the vault with the key file {keyFile}")
+        print(f"vault created at {vaultPath}. The vault is NOT open. Please open the vault with the key file {keyFile} to start using it.")
         print(f"!!!WARNING!!! -> Pleae store the key {keyFile} in a secure place")
         return
 
@@ -360,7 +360,6 @@ class VaultCommands:
 
 
 
-vc = VaultCommands()
 
 commands = {
         "open": lambda args: vc.open(args),
@@ -399,24 +398,26 @@ if(shutil.which("7z") is None):
     print("7z not found in path. Please add it to path and try again")
     sys.exit()
 
-prompt()
-    
+if __name__ == '__main__':
+    vc = VaultCommands()
+    prompt()
+        
 
-for line in sys.stdin:
-    if "EXIT" == line.rstrip().upper():
-        commands.get("close")([])
-        break
-    else:
-        if not line.rstrip() == "":
-            s = shlex.split(line)
-            cmdProcessed = False
-            try:
-                commands.get(s[0],lambda args: print("invalid command"))(s[1::])
-            except ValueError as ve:
-                print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
-            except Exception:
-                print("[ERROR] : Command Failed with an exception. Please backup the database ASAP")
-                traceback.print_exc()
-        prompt()
+    for line in sys.stdin:
+        if "EXIT" == line.rstrip().upper():
+            commands.get("close")([])
+            break
+        else:
+            if not line.rstrip() == "":
+                s = shlex.split(line)
+                cmdProcessed = False
+                try:
+                    commands.get(s[0],lambda args: print("invalid command"))(s[1::])
+                except ValueError as ve:
+                    print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
+                except Exception:
+                    print("[ERROR] : Command Failed with an exception. Please backup the database ASAP")
+                    traceback.print_exc()
+            prompt()
 
 
