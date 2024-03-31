@@ -32,7 +32,7 @@ vault created at vaults/tmp8. Please open the vault with the key file key8
 vault>
 
 ```
-*Please make sure you store the key generated in a secure location. Please do not store it in the vault itself or even on the same device as the vault.* The vault once created is not open. You will need to explicitly open the vault once it is created to start using it.
+*Please make sure you store the key generated in a secure location. Please do not store it in the vault itself or even on the same device as the vault.* The newly created vault is not open. You will need to explicitly open the vault once it is created to start using it.
 
 ### Opening a Vault
 
@@ -157,6 +157,24 @@ id   |  file name| path|               vault path|time added
 vault>close
 vault vaults/tmp8 closed
 vault>
+```
+
+### ENding  the Vault session
+
+Use `exit` to end the interactive session with the vault. If the vault is still open, exit will close the vault before ending the session.
+
+
+```
+vault>list
+Number of files in the vault: 3
+id   |  file name|     path|               vault path|time added
+-----------------------------------------------------------------------------------------------------------------
+    1|   test.txt|     test| vaults/tmp8/00000/256.7z| 2024-03-30 11:44:50
+    2| letter.txt|     test|  vaults/tmp8/00000/95.7z| 2024-03-30 11:48:44
+    3|       mtab| test/etc| vaults/tmp8/00000/153.7z| 2024-03-30 21:50:42
+vault>exit
+vault vaults/tmp8 closed
+
 ```
 
 
