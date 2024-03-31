@@ -1,5 +1,9 @@
 # filevault
-This is an encrypted vault to stash away files. Written python, it uses 7z to compress and encrypts files using a unique key for each file.  If you don't want to back up your data on the cloud, this could be a solution for you. Please give it a try
+This is an encrypted vault to secure your files. Written python, it uses 7z to compress and encrypts files using a unique key for each file.  If you don't want to back up your data on the cloud, this could be a solution for you. Please give it a try.
+
+   * You can create as many vaults as you desire. You are only limited by storage.
+   * A vault can be opened using a `master` key. _(The master key needs to be secured)_
+   * The size of the keys used to encrypt the files can be configured
 
 ## Tools and frameworks used
 
