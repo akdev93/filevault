@@ -13,6 +13,7 @@ This is an encrypted vault to stash away files. Written python, it uses 7z to co
 
    * Add 7z to your system path
    * Start the file vault using the command `python3 filevault.py`. This should start the shell with a prompt `vault>`
+   * To end a session type `exit` which will close any open vaults and end the interactive prompt
 
 ### Creating a Vault
 
@@ -62,6 +63,7 @@ vault>
 
 Use the `stash_directory` command to stash all files in the directory into the vault. This is not a recursive command. It will only stash the files found in the directory
 
+```
 vault>stash_directory test/etc
 
 id         : 3
@@ -74,7 +76,9 @@ vault>
 
 ### Listing the contents of the Vault
 
-Use the `list` command to list the contents of the vault. The command takes an optional argument which is used to filter the listing to match the word. The example below lists the vault that is open
+Use the `list` command to list the contents of the vault. The command takes an optional argument which is used to filter the listing to match the word. 
+
+The example below lists all the contents of the vault that is open
 
 ```
 vault>list
@@ -86,7 +90,7 @@ id   |  file name| path|               vault path|time added
 vault>
 ```
 
-The examle below lists the contents that match the word test 
+The examle below lists the contents that match the word test in the vault that is open
 
 ```
 vault>list test
