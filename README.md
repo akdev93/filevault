@@ -159,7 +159,7 @@ vault vaults/tmp8 closed
 vault>
 ```
 
-### ENding  the Vault session
+### Ending  the Vault session
 
 Use `exit` to end the interactive session with the vault. If the vault is still open, exit will close the vault before ending the session.
 
