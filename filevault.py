@@ -213,6 +213,10 @@ class VaultCommands:
             print(f"[ERROR] key file {args[1]} not found")
             return 
 
+        if(not Path(args[0]).is_dir()):
+            print(f"[ERROR] vault {args[0]} not found")
+            return
+
         self.keyFile = args[1]
         encryptor = Encryptor(lambda: KeyGenerators.fromFile(args[1]))
 
@@ -414,6 +418,7 @@ if __name__ == '__main__':
                 try:
                     commands.get(s[0],lambda args: print("invalid command"))(s[1::])
                 except ValueError as ve:
+                    print(f"command failed with error: {ve}")
                     print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
                 except Exception:
                     print("[ERROR] : Command Failed with an exception. Please backup the database ASAP")
