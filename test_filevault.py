@@ -17,7 +17,6 @@ class TestVaultCommandMethods(unittest.TestCase):
         self.sourceDir = f"{self.testRootDir}/source"
         Path(self.vaultDir).mkdir()
         Path(self.sourceDir).mkdir()
-        print("set up")
 
     def test_open_invalid_args(self):
         vc = VaultCommands()
@@ -30,7 +29,6 @@ class TestVaultCommandMethods(unittest.TestCase):
         self.assertTrue(vc.vault is None)
 
     def test_open_validKeyNoPath(self):
-        #Path("_test_key").unlink()
         keyFile = open("_test_key", "w")
         keyFile.write("key")
         keyFile.close()
@@ -86,7 +84,6 @@ class TestVaultCommandMethods(unittest.TestCase):
 
         vc.close([])
 
-
     def createTestFiles(self, count):
         testFiles = []
         for num in range(0,count):
@@ -95,11 +92,8 @@ class TestVaultCommandMethods(unittest.TestCase):
             p.write_text(data)
             testFiles.append(p.as_posix())
         return testFiles
-
-
             
     def tearDown(self):
-
         print(f"del:{self.testRootDir}")
         shutil.rmtree(self.testRootDir)
 
