@@ -56,11 +56,21 @@ class TestVaultCommandMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             vc.create([self.vaultDir])
 
+    def test_stash_invalid_args(self):
+        vc = VaultCommands()
+        with self.assertRaises(ValueError):
+            vc.stash([])
+
+    def test_retrieve_invalid_args(self):
+        vc = VaultCommands()
+        with self.assertRaises(ValueError):
+            vc.retrieve([])
+
     def test_stash(self):
         vc = VaultCommands()
         vc.create([self.vaultDir, self.keyFile])
         vc.open([self.vaultDir, self.keyFile])
-        testFiles = self.createTestFiles(5)
+        testFiles = self.createTestFiles(self.sourceDir, 5)
         for file in testFiles:
             vc.stash([file])
             self.assertFalse(Path(file).exists())
@@ -71,7 +81,7 @@ class TestVaultCommandMethods(unittest.TestCase):
         vc = VaultCommands()
         vc.create([self.vaultDir, self.keyFile])
         vc.open([self.vaultDir, self.keyFile])
-        testFiles = self.createTestFiles(5)
+        testFiles = self.createTestFiles(self.sourceDir, 5)
         for file in testFiles:
             hash = hashlib.sha1(Path(file).read_bytes()).hexdigest()
             vc.stash([file])
@@ -84,11 +94,46 @@ class TestVaultCommandMethods(unittest.TestCase):
 
         vc.close([])
 
-    def createTestFiles(self, count):
+    def test_stash_directory_retrieve(self):
+        fileHashes = {}
+        vc = VaultCommands()
+        vc.create([self.vaultDir, self.keyFile])
+        vc.open([self.vaultDir, self.keyFile])
+
+        subdir = f"{self.sourceDir}/sub-dir1"
+        Path(subdir).mkdir()
+        subDirTestFiles = self.createTestFiles(subdir, 10)
+
+        testFiles = self.createTestFiles(self.sourceDir, 5)
+        for file in testFiles:
+            hash = hashlib.sha1(Path(file).read_bytes()).hexdigest()
+            fileHashes[file] = hash
+        vc.stashDirectory([self.sourceDir])
+
+        # all files in the subdirectory should remain
+        for file in subDirTestFiles:
+            self.assertTrue(Path(file).exists())
+
+        # all files in the directory should no longer exist
+        for file in testFiles:
+            self.assertFalse(Path(file).exists())
+            self.assertTrue(len(vc.vault.vaultRegistry.searchFiles(Path(file).name)) == 1)
+
+        # all files should be retrieved from the vault and prove to be similar
+        for file in testFiles:
+            id = vc.vault.vaultRegistry.searchFiles(Path(file).name)[0].id
+            vc.retrieve([id])
+            self.assertTrue(Path(file).exists())
+            self.assertTrue(hashlib.sha1(Path(file).read_bytes()).hexdigest() == fileHashes[file])
+
+        vc.close([])
+
+
+    def createTestFiles(self, dir, count):
         testFiles = []
         for num in range(0,count):
             data = secrets.token_urlsafe(random.randint(0,num*1000))
-            p = Path(f"{self.sourceDir}/file-{num}.txt")
+            p = Path(f"{dir}/file-{num}.txt")
             p.write_text(data)
             testFiles.append(p.as_posix())
         return testFiles
@@ -97,4 +142,4 @@ class TestVaultCommandMethods(unittest.TestCase):
         print(f"del:{self.testRootDir}")
         shutil.rmtree(self.testRootDir)
 
-        
+
