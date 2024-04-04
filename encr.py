@@ -27,7 +27,7 @@ class Encryptor:
         self.encryptFiles([file], outputFileName, outputDirectory)
 
 
-    def encryptFile2(self, file, outputDirectory, outputFile):
+    def encryptFileTo(self, file, outputDirectory, outputFile):
 
         outputFileName = f'{outputFile}'
 
