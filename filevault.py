@@ -141,7 +141,7 @@ class Vault:
         while(vaultFilePath.exists()):
             vaultFilePath = Path(f"{vaultDirPath}/{random.randint(0,256)}.7z")
         
-        encryptor.encryptFile2(file, vaultDirPath.as_posix(), vaultFilePath.name)
+        encryptor.encryptFileTo(file, vaultDirPath.as_posix(), vaultFilePath.name)
         fileInfo = self.vaultRegistry.saveFileInfo(FileInfo(0, filePath.name, filePath.parent.as_posix(), vaultFilePath.as_posix(), key, datetime.datetime.now()))
         Path(file).unlink()
         return fileInfo
@@ -187,7 +187,7 @@ class VaultCommands:
         key = KeyGenerators.randomKey(1024)
         encryptor = Encryptor(lambda:key)
         try:
-            encryptor.encryptFile2(f"{vaultRegistry.directoryPath}/file-vault.db", f"{vaultRegistry.directoryPath}", "file-vault.db.7z")
+            encryptor.encryptFileTo(f"{vaultRegistry.directoryPath}/file-vault.db", f"{vaultRegistry.directoryPath}", "file-vault.db.7z")
         except EncryptionException:
             print("[ERROR] encryption of the database failed. Could not create vault")
             return
@@ -264,7 +264,7 @@ class VaultCommands:
         self.vault.vaultRegistry.close()
         encryptor = Encryptor(lambda: KeyGenerators.fromFile(self.keyFile))
         try:
-            encryptor.encryptFile2(f"{self.vault.vaultRegistry.directoryPath}/file-vault.db", f"{self.vault.vaultRegistry.directoryPath}", "file-vault.db.7z")
+            encryptor.encryptFileTo(f"{self.vault.vaultRegistry.directoryPath}/file-vault.db", f"{self.vault.vaultRegistry.directoryPath}", "file-vault.db.7z")
         except EncryptionException:
             print("[ERROR] encryption of the database failed. Could not close vault.")
             return 
