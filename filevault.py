@@ -398,31 +398,49 @@ def prompt():
     sys.stdout.write("vault>")
     sys.stdout.flush()
 
+
+def executeCommand(line):
+    if "EXIT" == line.rstrip().upper():
+        commands.get("close")([])
+    else:
+        if not line.rstrip() == "":
+            s = shlex.split(line)
+            try:
+                commands.get(s[0],lambda args: print("invalid command"))(s[1::])
+            except ValueError as ve:
+                print(f"command failed with error: {ve}")
+                print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
+            except Exception:
+                print("[ERROR] : Command Failed with an exception. Please backup the database ASAP")
+                traceback.print_exc()
+
+
 if(shutil.which("7z") is None):
     print("7z not found in path. Please add it to path and try again")
     sys.exit()
 
 if __name__ == '__main__':
     vc = VaultCommands()
-    prompt()
-        
 
-    for line in sys.stdin:
-        if "EXIT" == line.rstrip().upper():
-            commands.get("close")([])
-            break
-        else:
-            if not line.rstrip() == "":
-                s = shlex.split(line)
-                cmdProcessed = False
-                try:
-                    commands.get(s[0],lambda args: print("invalid command"))(s[1::])
-                except ValueError as ve:
-                    print(f"command failed with error: {ve}")
-                    print(f"[ERROR]: Usage: {command_usage.get(s[0])}")
-                except Exception:
-                    print("[ERROR] : Command Failed with an exception. Please backup the database ASAP")
-                    traceback.print_exc()
+    if(len(sys.argv) == 2):
+        scriptFile = sys.argv[1]
+        print(f"Executing script {scriptFile}")
+
+        f = open(scriptFile, "r")
+        lines = f.readlines()
+        for line in lines:
+            cmd = line.strip("\n")
+            print(cmd)
+            executeCommand(line)
+        #
+    else:
+        
+        prompt()
+            
+        for line in sys.stdin:
+            executeCommand(line)
+            if "EXIT" == line.rstrip().upper():
+                break
             prompt()
 
 
