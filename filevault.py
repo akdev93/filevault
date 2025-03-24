@@ -342,6 +342,13 @@ class VaultCommands:
                 self.stash([filePath.as_posix()])
 
 
+    def deleteFile(self, args):
+        if(len(args) != 1):
+            raise ValueError("Insufficient arguments. File id expected")
+
+        self.vault.removeFile(args[0])
+        
+
     def info(self, args):
         if(len(args) != 1):
             raise ValueError("Invalid number of arguments for info command")
@@ -412,7 +419,8 @@ commands = {
         "config": lambda args: vc.config(args),
         "stash_directory": lambda args: vc.stashDirectory(args),
         "info": lambda args: vc.info(args),
-        "stash_override": lambda args: vc.stashOverride(args)
+        "stash_override": lambda args: vc.stashOverride(args),
+        "delete": lambda args: vc.deleteFile(args)
         }
 
 command_usage = {
@@ -427,7 +435,8 @@ command_usage = {
         "config": "config <config> <value>",
         "stash_directory": "stash_directory <directory>",
         "stash_override": "stash_override <file with path>",
-        "info": "info <id>"
+        "info": "info <id>",
+        "delete": "delete <file id>"
         }
 
 
