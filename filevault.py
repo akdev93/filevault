@@ -94,6 +94,11 @@ class VaultRegistry:
         self.connection.commit()
         return fileInfo
 
+    def deleteFileInfo(self, id):
+        self.cursor.execute(f"delete from vault_registry where id={id}")
+        self.connection.commit()
+        return
+
     def close(self):
         self.connection.close()
 
@@ -151,6 +156,11 @@ class Vault:
         fileInfo = self.vaultRegistry.getFileInfoById(id)
         encryptor = Encryptor(lambda:fileInfo.encryptionKey)
         encryptor.decryptFile(fileInfo.vaultPath, fileInfo.filePath)
+
+    def removeFile(self, id):
+        fileInfo = self.vaultRegistry.getFileInfoById(id)
+        Path(fileInfo.vaultPath).unlink()
+        self.vaultRegistry.deleteFileInfo(id)
 
     def updateConfig(self, key, value):
         self.vaultConfig = self.vaultRegistry.updateConfig(key, value)
@@ -286,9 +296,35 @@ class VaultCommands:
         if(not Path(args[0]).exists()):
             print(f"File {args[0]} not found")
             return 
-            
+
         fi = self.vault.stash(args[0])
         self.printFileInfo(fi)
+
+    def stashOverride(self, args):
+        if(len(args) != 1):
+            raise ValueError("Invalid number of arguments for stashOverride command")
+
+        if(self.vault is None):
+            print("No vault is open")
+            return
+
+        results = self.vault.vaultRegistry.searchFiles(Path(args[0]).name)
+        filePath = Path(args[0])
+        existingFilesForDeletion = list()
+
+        for fileInfo in results:
+            #print(f"fileInfo: {fileInfo.fileName} - {fileInfo.filePath} | path: {filePath.parent.as_posix()} - {filePath.name}")
+
+            if(fileInfo.filePath == filePath.parent.as_posix() and fileInfo.fileName == filePath.name):
+                existingFilesForDeletion.append(fileInfo)
+
+        for existingFile in existingFilesForDeletion:
+                print(f"Removing previous version of the file from the vault:{existingFile.id}:{existingFile.filePath}/{existingFile.fileName}")
+                self.vault.removeFile(existingFile.id)
+
+        self.stash(args)
+
+
 
 
     def stashDirectory(self, args):
@@ -305,6 +341,13 @@ class VaultCommands:
             if(filePath.is_file()):
                 self.stash([filePath.as_posix()])
 
+
+    def deleteFile(self, args):
+        if(len(args) != 1):
+            raise ValueError("Insufficient arguments. File id expected")
+
+        self.vault.removeFile(args[0])
+        
 
     def info(self, args):
         if(len(args) != 1):
@@ -375,7 +418,9 @@ commands = {
         "help": lambda args: vc.help(args),
         "config": lambda args: vc.config(args),
         "stash_directory": lambda args: vc.stashDirectory(args),
-        "info": lambda args: vc.info(args)
+        "info": lambda args: vc.info(args),
+        "stash_override": lambda args: vc.stashOverride(args),
+        "delete": lambda args: vc.deleteFile(args)
         }
 
 command_usage = {
@@ -389,7 +434,9 @@ command_usage = {
         "help": "help <command>",
         "config": "config <config> <value>",
         "stash_directory": "stash_directory <directory>",
-        "info": "info <id>"
+        "stash_override": "stash_override <file with path>",
+        "info": "info <id>",
+        "delete": "delete <file id>"
         }
 
 

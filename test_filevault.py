@@ -77,6 +77,29 @@ class TestVaultCommandMethods(unittest.TestCase):
             self.assertTrue(len(vc.vault.vaultRegistry.searchFiles(Path(file).name)) == 1)
         vc.close([])
 
+    def test_stashOverwrite(self):
+        vc = VaultCommands()
+        vc.create([self.vaultDir, self.keyFile])
+        vc.open([self.vaultDir, self.keyFile])
+        testFile = self.createTestFiles(self.sourceDir,1)[0]
+        print(f"test file for test: {testFile}")
+        vc.stash([testFile])
+        self.assertFalse(Path(testFile).exists())
+        self.assertTrue(len(vc.vault.vaultRegistry.searchFiles(Path(testFile).name)) == 1)
+        newTestFile = self.createTestFiles(self.sourceDir,1)[0]
+        Path(newTestFile).rename(Path(testFile))
+        self.assertTrue(Path(testFile).exists())
+        vc.stashOverride([testFile])
+        self.assertFalse(Path(testFile).exists())
+        print(f"size: {len(vc.vault.vaultRegistry.searchFiles(Path(testFile).name))}")
+        for f in vc.vault.vaultRegistry.searchFiles(Path(testFile).name):
+            print(f"file found: {f.id} - {f.fileName} - {f.filePath}")
+        vc.close([])
+        self.assertTrue(len(vc.vault.vaultRegistry.searchFiles(Path(testFile).name)) == 1)
+
+
+
+
     def test_stash_retrieve(self):
         vc = VaultCommands()
         vc.create([self.vaultDir, self.keyFile])
